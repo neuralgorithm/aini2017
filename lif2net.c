@@ -5,6 +5,7 @@
 #define V_INIT (V_LEAK)
 #define V_RESET (V_LEAK)
 #define THETA -55.0
+#define R_M 1.0
 #define DT 1.0
 #define T 1000.0
 #define NT 1000 // ( T / DT )
@@ -21,8 +22,8 @@ void loop ( void )
   for ( int nt = 0; nt < NT; nt++ ) {
     printf ( "%f %f %f\n", DT * nt, v [ 0 ], v [ 1 ]);
     double dv [ 2 ];
-    dv [ 0 ] = ( DT / TAU ) * ( - ( v [ 0 ] - V_LEAK ) + g [ 0 ] + i_ext [ 0 ] );
-    dv [ 1 ] = ( DT / TAU ) * ( - ( v [ 1 ] - V_LEAK ) + g [ 1 ] + i_ext [ 1 ] );
+    dv [ 0 ] = ( DT / TAU ) * ( - ( v [ 0 ] - V_LEAK ) + g [ 0 ] + R_M * i_ext [ 0 ] );
+    dv [ 1 ] = ( DT / TAU ) * ( - ( v [ 1 ] - V_LEAK ) + g [ 1 ] + R_M * i_ext [ 1 ] );
     double dg [ 2 ];
     dg [ 0 ] = ( DT / TAU_SYN ) * ( - g [ 0 ] + W * spike [ 1 ] );
     dg [ 1 ] = ( DT / TAU_SYN ) * ( - g [ 1 ] + W * spike [ 0 ] );
