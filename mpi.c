@@ -31,7 +31,7 @@ extern void timer_start ( void );
 extern double timer_elapsed ( void );
 
 static double v [ N ], ge [ N ], gi [ N ];
-static int *w_exc, *w_inh, spike [ N ], *spike_local;
+static int *w_exc, *w_inh, spike [ N ];
 
 static FILE *file_spike;
 
@@ -66,10 +66,6 @@ void initialize ( const int mpi_size, const int mpi_rank )
       w_inh [ j + N * i ] = ( genrand_real2() < P_INH ) ? 1 : 0;
     }
   }
-
-  const int n_each = N / mpi_size;
-  spike_local = (int *) malloc ( n_each * sizeof ( int ) );
-  
 }
 
 void finalize ( const int mpi_rank )
@@ -78,7 +74,6 @@ void finalize ( const int mpi_rank )
     fclose ( file_spike );
   }
   
-  free ( spike_local );
   free ( w_exc );
   free ( w_inh );
 }
@@ -102,7 +97,7 @@ void calculateSynapse ( const int n, const int offset )
   }
 }
 
-void updateMembranePotential ( const int n, const int offset )
+void updateMembranePotential ( const int n, const int offset, int spike_local [] )
 {
   int i = n + offset; 
   v [ i ] += DT * ( ge [ i ] + gi [ i ] - ( v [ i ] - V_LEAK ) ) / TAU_MBP;
@@ -126,15 +121,15 @@ void outputSpike ( const int nt )
 void loop ( const int mpi_size, const int mpi_rank )
 {
   const int n_each = N / mpi_size;
-
+  int spike_local [ n_each ];
   timer_start ();
   for ( int nt = 0; nt < NT; nt++ ) {
     for ( int n = 0; n < n_each; n++ ) {
       calculateSynapse ( n, n_each * mpi_rank );
-      updateMembranePotential ( n, n_each * mpi_rank );
+      updateMembranePotential ( n, n_each * mpi_rank, spike_local );
     }
     MPI_Allgather ( spike_local, n_each, MPI_INT, spike, n_each, MPI_INT, MPI_COMM_WORLD );
-    //if ( mpi_rank == 0 ) { outputSpike ( nt ); }
+    if ( mpi_rank == 0 ) { outputSpike ( nt ); }
   }
   double elapsedTime = timer_elapsed ();
   if ( mpi_rank == 0 ) { printf ( "Elapsed time = %f sec.\n", elapsedTime); }
