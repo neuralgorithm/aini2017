@@ -4,7 +4,7 @@ CFLAGS = -std=c99 -Wall -O3
 OMPFLAGS = -fopenmp
 MISC_OBJS = mt19937ar-cok.o timer.o
 
-all: lif lif2 lif2net randomnet omp mpi hybrid
+all: lif lif2 lif2net randomnet omp ompsyn mpi hybrid
 
 lif: lif.o
 	$(CC) $(CFLAGS) -o $@ $^ -lm
@@ -26,6 +26,10 @@ omp: omp.o $(MISC_OBJS)
 	$(CC) $(OMPFLAGS) $(CFLAGS) -o $@ $^ -lm
 omp.o: omp.c
 	$(CC) $(OMPFLAGS) $(CFLAGS) -o $@ -c $<
+ompsyn: ompsyn.o $(MISC_OBJS)
+	$(CC) $(OMPFLAGS) $(CFLAGS) -o $@ $^ -lm
+ompsyn.o: ompsyn.c
+	$(CC) $(OMPFLAGS) $(CFLAGS) -o $@ -c $<
 mpi: mpi.o $(MISC_OBJS)
 	$(MPICC) $(CFLAGS) -o $@ $^ -lm
 mpi.o: mpi.c
@@ -41,7 +45,9 @@ timer.o: timer.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	rm -f lif lif2 lif2net randomnet omp mpi hybrid *~ *.o
+	rm -f lif lif2 lif2net randomnet omp ompsyn mpi hybrid *~ *.o
+distclean: clean
+	rm -f *.dat
 
 mpirun:
 	mpirun -hostfile hostfile -np 16 ./mpi
