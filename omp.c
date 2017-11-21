@@ -11,7 +11,7 @@
 #define DT 1.
 #define NT 1000  // ( T / DT )
 
-#define TAU_MBP 20.
+#define TAU_M 20.
 #define TAU_GE 5.
 #define TAU_GI 10.
 
@@ -94,7 +94,7 @@ void calculateSynapse ( const int i )
 
 void updateMembranePotential ( const int i )
 {
-  v [ i ] += DT * ( ge [ i ] + gi [ i ] - ( v [ i ] - V_LEAK ) ) / TAU_MBP;
+  v [ i ] += DT * ( ge [ i ] + gi [ i ] - ( v [ i ] - V_LEAK ) ) / TAU_M;
   if ( v [ i ] > V_THRESHOLD ) {
     spike [ i ] = 1;
     v [ i ] = V_RESET;
